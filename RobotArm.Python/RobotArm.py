@@ -71,7 +71,7 @@ class RobotArm:
         self._send("drop")
 
     def scan(self):
-        color = self._send("scan")
+        return self._send("scan")
 
 
     @property
