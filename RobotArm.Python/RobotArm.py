@@ -19,7 +19,7 @@ class RobotArm:
         except:
             raise SocketError("Could not connect to the socket")
 
-        self._sock.settimeout(2) # default timeout = 60 seconds
+        self._sock.settimeout(60)
         self._timeout = 60
         self._speed = 0.5
         self._receive()
