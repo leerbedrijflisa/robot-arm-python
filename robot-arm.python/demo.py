@@ -1,6 +1,6 @@
 import RobotArm
 
-robot_arm = RobotArm.RobotArm("127.0.0.1", 9876)
+robot_arm = RobotArm.Controller()
 robot_arm.timeout = 10
 robot_arm.speed = 1.0
 
@@ -29,13 +29,14 @@ def scan(right):
     global nr
     global nl
     robot_arm.grab()
+    color = robot_arm.scan()
     if right:
-        if robot_arm.scan() == "none":
+        if color == RobotArm.Colors.none:
             robot_arm.move_right()
             scan(right)
             nr += 1
     elif not right:
-        if robot_arm.scan() == "none":
+        if color == RobotArm.Colors.none:
             robot_arm.move_left()
             scan(right)
             nl += 1
