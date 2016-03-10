@@ -28,13 +28,14 @@ with RobotArm.Controller("127.0.0.1", 9876) as robot_arm:
         global nr
         global nl
         robot_arm.grab()
+        color = robot_arm.scan()
         if right:
-            if robot_arm.scan() == "none":
+            if color == RobotArm.Colors.none:
                 robot_arm.move_right()
                 scan(right)
                 nr += 1
         elif not right:
-            if robot_arm.scan() == "none":
+            if color == RobotArm.Colors.none:
                 robot_arm.move_left()
                 scan(right)
                 nl += 1
