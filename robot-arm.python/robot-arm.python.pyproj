@@ -6,7 +6,7 @@
     <ProjectGuid>fe03bae4-ff44-4c01-b197-a847460fc7d4</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>demo.py</StartupFile>
+    <StartupFile>demo-disposable.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
