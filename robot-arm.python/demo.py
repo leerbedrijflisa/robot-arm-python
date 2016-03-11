@@ -58,5 +58,4 @@ for x in range(0, 100000):
     get_new_block()
     robot_arm.drop()
 
-
 robot_arm.close()

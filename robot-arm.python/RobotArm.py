@@ -3,13 +3,24 @@ from socket import AF_INET, SOCK_STREAM
 from enum import Enum
 
 class ProtocolError(Exception):
-    pass
+    def raise_exception(response, expected):
+        raise ProtocolError("Server responded with '{0}' but expected {1}.\n".format(response, expected))
 
 class SocketError(Exception):
-    pass
+    def raise_exception(connection_open, ip, port):
+        if not connection_open:
+            raise SocketError("You already closed the connection with the server.\n")
+        else:
+            raise SocketError("Could not connect to the RobotArm Server. Is the RobotArm Server running on ip '{0}' and port '{1}'?\n".format(ip, port))
 
 class TimeoutError(Exception):
-    pass
+    def raise_exception(timeout):
+        raise TimeoutError("The RobotArm server took more than '{0}' seconds to respond.\n".format(timeout))
+
+class ValueError(Exception):
+    def raise_exception():
+        raise ValueError("Speed cant be lower than 0 or higher than 1.\n")
+
 
 class Colors(Enum):
     red = 1
@@ -23,29 +34,26 @@ class Controller:
         self._ip = address
         self._port = port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._connection_open = True
 
         try:
             self._sock.connect((address, port))
+            self._connection_open = True
         except:
-            self.raise_socket_error()
+            SocketError.raise_exception(True, self._ip, self._port)
 
         self._sock.settimeout(60)
         self._timeout = 60
-        
         self._speed = 0.5
-        response = self._receive()
-        if response != "hello":
-            self.raise_protocol_error(response, "hello")
 
-        pass
+        response = self._receive()
+        self._check_response(response, "hello", ["hello"])
 
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, traceback):
-        self._connection_open = False
         self._sock.close()
+        self._connection_open = False
         return False
 
     def _send(self, command):
@@ -53,48 +61,55 @@ class Controller:
             command += "\n"
             self._sock.sendall(str.encode(command))
         except:
-            self.raise_socket_error()
+            SocketError.raise_exception(self._connection_open, self._ip, self._port)
         return self._receive()
 
     def _receive(self):
         try:
             data = self._sock.recv(4096)
         except socket.timeout:
-            self.raise_timeout_error()
+            TimeoutError.raise_exception(self._timeout)
         except socket.error:
-            self.raise_socket_error()
+            SocketError.raise_exception(self._connection_open, self._ip, self._port)
 
         return data.decode("utf-8")
+
+    def _check_response(self, response, expected, *allowed):
+        correct_resp = False
+        if any(response in a for a in allowed):
+            correct_resp = True
+        if not correct_resp:
+            ProtocolError.raise_exception(response, expected)
 
 
     def close(self):
         self._connection_open = False
         self._sock.close()
 
+
     def move_left(self):
         response = self._send("move left")
-        if response != "ok" and response != "bye":
-            self.raise_protocol_error(response, "ok")
+        self._check_response(response, "ok", ["ok", "bye"])
+
 
     def move_right(self):
         response = self._send("move right")
-        if response != "ok" and response != "bye":
-            self.raise_protocol_error(response, "ok")
+        self._check_response(response, "ok", ["ok", "bye"])
+
 
     def grab(self): 
-        response = response = self._send("grab")
-        if response != "ok" and response != "bye":
-            self.raise_protocol_error(response, "ok")
+        response = self._send("grab")
+        self._check_response(response, "ok", ["ok", "bye"])
+
 
     def drop(self):
         response = self._send("drop")
-        if response != "ok" and response != "bye":
-            self.raise_protocol_error(response, "ok")
+        self._check_response(response, "ok", ["ok", "bye"])
+
 
     def scan(self):
         response = self._send("scan")
-        if response != "none" and response != "red"  and response != "blue" and response != "green" and response != "white" and response != "bye":
-            self.raise_protocol_error(response, "a color")
+        self._check_response(response, "a color", ["red", "blue", "green", "white", "none", "bye"])
 
         if response == "red":
             return Colors.red
@@ -115,32 +130,16 @@ class Controller:
     @speed.setter
     def speed(self, value):
         if (value < 0 or value > 1):
-            self.raise_value_error(0, 1)
-        self._send(str("speed " + str(value)))
+            ValueError.raise_exception()
+        self._send("speed {0}".format(value))
         self._speed = value
+
 
     @property
     def timeout(self):
-        return self._speed
+        return self._timeout
 
     @timeout.setter
     def timeout(self, value):
         self._sock.settimeout(value)
         self._timeout = value
-
-
-
-    def raise_protocol_error(self, response, expected):
-        raise ProtocolError("Server responded with '{0}' but expected {1}.".format(response, expected))
-     
-    def raise_socket_error(self):
-        if not self._connection_open:
-            raise SocketError("You already closed the connection with the server.")
-        else:
-            raise SocketError("Could not connect to the RobotArm Server. Is the RobotArm Server running on ip '{0}' and port '{1}'?".format(self._ip, self._port))
-
-    def raise_timeout_error(self):
-        raise TimeoutError("The RobotArm server took more than '{0}' seconds to respond.".format(self._timeout))
-
-    def raise_value_error(self, min, max):
-        raise ValueError("speed cant be lower than {0} or higher than {1}", min, max)
