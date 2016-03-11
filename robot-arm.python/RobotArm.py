@@ -19,7 +19,7 @@ class TimeoutError(Exception):
 
 class ValueError(Exception):
     def raise_exception():
-        raise ValueError("Speed cant be lower than 0 or higher than 1.\n")
+        raise ValueError("Speed must be a float and must be higher than 0 and lower than 1 (0 and 1 included).\n")
 
 
 class Colors(Enum):
@@ -129,7 +129,7 @@ class Controller:
 
     @speed.setter
     def speed(self, value):
-        if (value < 0 or value > 1):
+        if ((not isinstance(value, float) and not isinstance(value, int)) or value < 0 or value > 1):
             ValueError.raise_exception()
         self._send("speed {0}".format(value))
         self._speed = value

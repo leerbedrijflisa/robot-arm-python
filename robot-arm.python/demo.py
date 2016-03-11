@@ -54,6 +54,8 @@ def get_new_block():
     right = not right
 
 
+robot_arm.speed = 1
+
 for x in range(0, 100000):
     get_new_block()
     robot_arm.drop()
