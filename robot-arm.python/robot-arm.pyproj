@@ -6,12 +6,12 @@
     <ProjectGuid>fe03bae4-ff44-4c01-b197-a847460fc7d4</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>demo-disposable.py</StartupFile>
+    <StartupFile>demo.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>robot-arm.python</Name>
+    <Name>robot-arm</Name>
     <RootNamespace>RobotArm.Python</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -32,9 +32,9 @@
     <Compile Include="RobotArm.py">
       <SubType>Code</SubType>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Demos\" />
+    <Compile Include="setup.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

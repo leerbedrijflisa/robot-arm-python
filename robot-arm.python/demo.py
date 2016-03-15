@@ -4,7 +4,7 @@ robot_arm = RobotArm.Controller()
 robot_arm.timeout = 10
 robot_arm.speed = 1.0
 
-amount = 100
+amount = 40
 
 nr = 1
 nl = 1
@@ -21,6 +21,24 @@ def clear_stack():
         robot_arm.drop()
         robot_arm.move_right()
         clear_stack()
+
+def grab_put_left():
+    robot_arm.grab()
+    if (robot_arm.scan() != RobotArm.Colors.none):
+        for j in range(0, i + 1):
+            robot_arm.move_left()
+        robot_arm.drop()
+        for j in range(0, i + 1):
+            robot_arm.move_right()
+        grab_put_left()
+
+def clear_sort_stacks(i):
+    for j in range(0, i):
+        robot_arm.move_right()
+    grab_put_left()
+    for j in range(0, i):
+        robot_arm.move_left()
+
 
 def left_or_right(right):
     if right:
@@ -90,8 +108,10 @@ def sort_block():
         put_block(4)
 
 
-
 clear_stack()
+
+for i in range(1,5):
+    clear_sort_stacks(i)
 
 for x in range(0, amount):
     get_new_block()
