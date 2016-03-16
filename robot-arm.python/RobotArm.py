@@ -123,8 +123,12 @@ class Controller:
             return Colors.none
 
 
-    def load_level(self, name):
-        response = self._send("load {0}".format(name))
+    def load_level(self, name, user=None):
+        if user == None:
+            response = self._send("load {0}".format(name))
+        else:
+            response = self._send("load {0} {1}".format(name, user))
+
         self._check_response(response, "ok", ["ok", "bye"])
 
 

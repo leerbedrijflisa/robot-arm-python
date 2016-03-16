@@ -1,7 +1,7 @@
 import RobotArm
 
 robot_arm = RobotArm.Controller()
-robot_arm.timeout = 10
+robot_arm.timeout = 1000
 robot_arm.speed = 1.0
 
 reds = 0
@@ -36,7 +36,7 @@ def sort_block():
     if color == RobotArm.Colors.none:
         return False
 
-robot_arm.load_level("tower")
+robot_arm.load_level("tower", "bas")
 
 robot_arm.grab()
 for i in range(0,1000):
