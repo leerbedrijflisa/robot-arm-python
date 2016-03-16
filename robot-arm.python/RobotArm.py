@@ -101,9 +101,6 @@ class Controller:
         response = self._send("grab")
         self._check_response(response, "ok", ["ok", "bye"])
 
-    def load(self, name):
-        response = self._send("load {0}".format(name))
-        self._check_response(response, "ok", ["ok", "bye"])
 
     def drop(self):
         response = self._send("drop")
@@ -124,6 +121,12 @@ class Controller:
             return Colors.white
         elif response == "none":
             return Colors.none
+
+
+    def load_level(self, name):
+        response = self._send("load {0}".format(name))
+        self._check_response(response, "ok", ["ok", "bye"])
+
 
 
     @property
