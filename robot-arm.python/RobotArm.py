@@ -62,7 +62,7 @@ class Controller:
             self._sock.sendall(str.encode(command))
         except:
             SocketError.raise_exception(self._connection_open, self._ip, self._port)
-        return self._receive()
+        return self._receive().replace("\n", "")
 
     def _receive(self):
         try:
@@ -76,6 +76,7 @@ class Controller:
 
     def _check_response(self, response, expected, *allowed):
         correct_resp = False
+        response = response.replace("\n", "")
         if any(response in a for a in allowed):
             correct_resp = True
         if not correct_resp:
@@ -123,13 +124,9 @@ class Controller:
             return Colors.none
 
 
-    def load_level(self, name, user=None):
-        if user == None:
-            response = self._send("load {0}".format(name))
-        else:
-            response = self._send("load {0} {1}".format(name, user))
-
-        self._check_response(response, "ok", ["ok", "bye"])
+    def load_level(self, name):
+        response = self._send("load {0}".format(name))
+        self._check_response(response, "ok", ["ok", "wrong", "bye"])
 
 
 

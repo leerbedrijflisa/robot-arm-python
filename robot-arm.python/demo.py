@@ -36,7 +36,11 @@ def sort_block():
     if color == RobotArm.Colors.none:
         return False
 
-robot_arm.load_level("tower", "bas")
+#robot_arm.load_level("bas/tower")
+#robot_arm.load_level("tower")
+#robot_arm.load_level("random")
+#robot_arm.load_level("empty")
+robot_arm.load_level("nonexisting/level")
 
 robot_arm.grab()
 for i in range(0,1000):
