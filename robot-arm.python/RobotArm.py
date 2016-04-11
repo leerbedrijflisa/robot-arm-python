@@ -7,7 +7,10 @@ class ProtocolError(Exception):
         raise ProtocolError("Server responded with '{0}' but expected {1}.\n".format(response, expected))
 
 class SocketError(Exception):
-    def raise_exception(connection_open, ip, port):
+    def raise_exception(connection_open, ip, port, serverClosed):
+        serverClosed = serverClosed or False
+        if serverClosed:
+            raise SocketError("Server has gone byebye.\n")
         if not connection_open:
             raise SocketError("You already closed the connection with the server.\n")
         else:
@@ -23,11 +26,11 @@ class ValueError(Exception):
 
 
 class Colors(Enum):
-    red = 1
-    blue = 2
-    green = 3
-    white = 4
-    none = 5
+    red = "red"
+    blue = "blue"
+    green = "green"
+    white = "white"
+    none = "none"
 
 class Controller:
     def __init__(self, address="127.0.0.1", port=9876):
@@ -39,7 +42,7 @@ class Controller:
             self._sock.connect((address, port))
             self._connection_open = True
         except:
-            SocketError.raise_exception(True, self._ip, self._port)
+            SocketError.raise_exception(True, self._ip, self._port, False)
 
         self._sock.settimeout(60)
         self._timeout = 60
@@ -61,22 +64,25 @@ class Controller:
             command += "\n"
             self._sock.sendall(str.encode(command))
         except:
-            SocketError.raise_exception(self._connection_open, self._ip, self._port)
+            SocketError.raise_exception(self._connection_open, self._ip, self._port, False)
         return self._receive().replace("\n", "")
 
     def _receive(self):
         try:
             data = self._sock.recv(4096)
+            data = data.decode("utf-8").replace("\n", "")
+
+            if data == "bye":
+                SocketError.raise_exception(self._connection_open, self._ip, self._port, True)
         except socket.timeout:
             TimeoutError.raise_exception(self._timeout)
         except socket.error:
-            SocketError.raise_exception(self._connection_open, self._ip, self._port)
+            SocketError.raise_exception(self._connection_open, self._ip, self._port, False)
 
-        return data.decode("utf-8")
+        return data
 
     def _check_response(self, response, expected, *allowed):
         correct_resp = False
-        response = response.replace("\n", "")
         if any(response in a for a in allowed):
             correct_resp = True
         if not correct_resp:
@@ -84,8 +90,8 @@ class Controller:
 
 
     def close(self):
-        self._connection_open = False
         self._sock.close()
+        self._connection_open = False
 
 
     def move_left(self):
@@ -121,7 +127,7 @@ class Controller:
         elif response == "white":
             return Colors.white
         elif response == "none":
-            return Colors.none
+            return None
 
 
     def load_level(self, name):
@@ -138,7 +144,8 @@ class Controller:
     def speed(self, value):
         if ((not isinstance(value, float) and not isinstance(value, int)) or value < 0 or value > 1):
             ValueError.raise_exception()
-        self._send("speed {0}".format(value))
+        speed = str(value * 100).replace(".0", "")
+        self._send("speed {0}".format(speed))
         self._speed = value
 
 
